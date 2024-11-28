@@ -331,9 +331,10 @@ public class Parser {
 
     private Expr primary() {
         if (match(FALSE)) return new Expr.Literal(false);
-        if (match(TRUE)) return new Expr.Literal(true);
-        if (match(NIL)) return new Expr.Literal(null);
         if (match(IDENTIFIER)) return new Expr.Variable(previous());
+        if (match(NIL)) return new Expr.Literal(null);
+        if (match(THIS)) return new Expr.This(previous());
+        if (match(TRUE)) return new Expr.Literal(true);
 
         if (match(NUMBER, STRING)) return new Expr.Literal(previous().literal);
 

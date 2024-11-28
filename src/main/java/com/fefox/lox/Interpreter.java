@@ -170,6 +170,11 @@ public class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Object visitThisExpr(Expr.This expr) {
+        return lookUpVariable(expr.keyword, expr);
+    }
+
+    @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
         Object right = evaluate(expr.right);
 
@@ -343,7 +348,7 @@ public class Interpreter implements Expr.Visitor<Object>,
     }
 
 
-    private Object lookUpVariable(Token name, Expr.Variable expr) {
+    private Object lookUpVariable(Token name, Expr expr) {
         Integer distance = locals.get(expr);
         if (distance != null) {
             return environment.getAt(distance, name.lexeme);
