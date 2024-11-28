@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Interpreter implements Expr.Visitor<Object>,
                                     Stmt.Visitor<Void> {
-
+    private Environment environment = new Environment();
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -29,6 +29,18 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
 
         return null;
+    }
+
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
+    }
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+        return value;
     }
 
     @Override
@@ -89,6 +101,12 @@ public class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
         return null;
@@ -98,6 +116,18 @@ public class Interpreter implements Expr.Visitor<Object>,
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        if (stmt.initializer == null) {
+            throw new RuntimeError(stmt.name,
+                    "Variable '" + stmt.name.lexeme + "' not initialized.");
+        }
+
+        Object value = evaluate(stmt.initializer);
+        environment.define(stmt.name.lexeme, value);
         return null;
     }
 
@@ -113,6 +143,20 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     private void execute(Stmt statement) {
         statement.accept(this);
+    }
+
+    void executeBlock(List<Stmt> statements, Environment environment) {
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
+
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+
+        } finally {
+            this.environment = previous;
+        }
     }
 
     private Object evaluate(Expr expr) {
