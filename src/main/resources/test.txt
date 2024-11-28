@@ -28,8 +28,18 @@ print "-+-+-+-+-+-+-+-+-+-+-+";
 var i = 1;
 var temp = 0;
 
-for (var b = 1; i < 10000; b = temp + b) {
+for (var b = 1; i < 100; b = temp + b) {
   print i;
   temp = i;
   i = b;
 }
+print "-+-+-+-+-+-+-+-+-+-+-+";
+
+fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
+}
+
+print sayHi;
+sayHi("Dear", "Reader");
+
+print "-+-+-+-+-+-+-+-+-+-+-+";
