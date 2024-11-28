@@ -34,6 +34,15 @@ public class Parser {
         }
     }
 
+    private Stmt statement() {
+        if (match(IF)) return ifStatement();
+        if (match(PRINT)) return printStatement();
+        if (match(WHILE)) return whileStatement();
+        if (match(LEFT_BRACE)) return new Stmt.Block(block());
+
+        return expressionStatement();
+    }
+
     private Stmt varDeclaration() {
         Token name = consume(IDENTIFIER, "Expect variable name.");
 
@@ -45,12 +54,13 @@ public class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    private Stmt statement() {
-        if (match(IF)) return ifStatement();
-        if (match(PRINT)) return printStatement();
-        if (match(LEFT_BRACE)) return new Stmt.Block(block());
+    private Stmt whileStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after while condition.");
+        Stmt body = statement();
 
-        return expressionStatement();
+        return new Stmt.While(condition, body);
     }
 
     private Stmt ifStatement() {
