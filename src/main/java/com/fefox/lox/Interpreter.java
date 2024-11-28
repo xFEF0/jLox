@@ -156,7 +156,7 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while (isTruthy(stmt.condition)) {
+        while (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body);
         }
         return null;
