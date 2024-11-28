@@ -73,3 +73,29 @@ counter();
 
 print "-+-+-+-+-+-+-+-+-+-+-+";
 
+print "CLASS";
+class DevonshireCream {
+  serveOn() {
+    return "Scones";
+  }
+}
+
+print DevonshireCream;
+
+print "-+-+-+-+-+-+-+-+-+-+-+";
+
+print "INSTANCE";
+class Bagel {}
+var bagel = Bagel();
+print bagel;
+
+print "-+-+-+-+-+-+-+-+-+-+-+";
+
+print "METHOD";
+class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
+  }
+}
+
+Bacon().eat();

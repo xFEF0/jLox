@@ -16,7 +16,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private enum FunctionType {
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD
     }
 
     @Override
@@ -28,12 +29,21 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Void visitVarStmt(Stmt.Var stmt) {
+    public Void visitClassStmt(Stmt.Class stmt) {
         declare(stmt.name);
-        if (stmt.initializer != null) {
-            resolve(stmt.initializer);
-        }
         define(stmt.name);
+
+        for (Stmt.Function method : stmt.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            resolveFunction(method, declaration);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        resolve(stmt.expression);
         return null;
     }
 
@@ -43,12 +53,6 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         define(stmt.name);
 
         resolveFunction(stmt, FunctionType.FUNCTION);
-        return null;
-    }
-
-    @Override
-    public Void visitExpressionStmt(Stmt.Expression stmt) {
-        resolve(stmt.expression);
         return null;
     }
 
@@ -77,19 +81,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Void visitWhileStmt(Stmt.While stmt) {
-        resolve(stmt.condition);
-        resolve(stmt.body);
+    public Void visitVarStmt(Stmt.Var stmt) {
+        declare(stmt.name);
+        if (stmt.initializer != null) {
+            resolve(stmt.initializer);
+        }
+        define(stmt.name);
         return null;
     }
 
     @Override
-    public Void visitVariableExpr(Expr.Variable expr) {
-        if (!scopes.isEmpty() && scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
-            Lox.error(expr.name, "Can't read local variable in its own initializer.");
-        }
-
-        resolveLocal(expr, expr.name);
+    public Void visitWhileStmt(Stmt.While stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.body);
         return null;
     }
 
@@ -119,6 +123,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitGetExpr(Expr.Get expr) {
+        resolve(expr.object);
+        return null;
+    }
+
+    @Override
     public Void visitGroupingExpr(Expr.Grouping expr) {
         resolve(expr.expression);
         return null;
@@ -137,8 +147,25 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitSetExpr(Expr.Set expr) {
+        resolve(expr.value);
+        resolve(expr.object);
+        return null;
+    }
+
+    @Override
     public Void visitUnaryExpr(Expr.Unary expr) {
         resolve(expr.right);
+        return null;
+    }
+
+    @Override
+    public Void visitVariableExpr(Expr.Variable expr) {
+        if (!scopes.isEmpty() && scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
+            Lox.error(expr.name, "Can't read local variable in its own initializer.");
+        }
+
+        resolveLocal(expr, expr.name);
         return null;
     }
 
