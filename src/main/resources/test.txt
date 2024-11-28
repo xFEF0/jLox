@@ -126,3 +126,22 @@ class Cake {
 var cake = Cake();
 cake.flavor = "German chocolate";
 cake.taste();
+
+
+print "-+-+-+-+-+-+-+-+-+-+-+";
+
+print "INHERITANCE";
+class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
+}
+
+class BostonCream < Doughnut {
+  cook() {
+    super.cook();
+    print "Add cream on top.";
+  }
+}
+
+BostonCream().cook();
